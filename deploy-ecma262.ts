@@ -4,9 +4,11 @@ import path from "node:path";
 
 const DIR = "ecma262";
 
+console.time(DIR);
 await updateGit();
 await replaceUrls();
 await xmit();
+console.timeEnd(DIR);
 
 async function refactorFile(filepath: string, cb: (text: string) => string) {
     const file = Bun.file(filepath);
@@ -17,7 +19,7 @@ async function refactorFile(filepath: string, cb: (text: string) => string) {
 
 async function updateGit() {
     if (fs.existsSync(path.resolve(DIR, ".git"))) {
-        await $`cd ${DIR} && git pull`;
+        await $`cd ${DIR} && git clean -fd && git checkout . && git pull`;
     } else {
         await $`git clone https://github.com/JinDX/ecma262.com ${DIR} --depth=1`;
     }
@@ -35,10 +37,9 @@ async function replaceUrls() {
 }
 
 async function xmit() {
-    fs.rmSync(path.resolve(DIR, "README.md"));
-    fs.rmSync(path.resolve(DIR, "index.html"));
-    fs.rmSync(path.resolve(DIR, "_redirects"));
-    return Bun.write(
+    await $`cd ${DIR} && git rm -f README.md index.html _redirects`;
+
+    await Bun.write(
         path.resolve(DIR, "xmit.toml"),
         `\
 [[redirects]]
@@ -61,4 +62,6 @@ name = "x-content-type-options"
 [[headers]]
 name = "server"`
     );
+
+    await $`cd ${DIR} && xmit ecma262.yieldray.fun`;
 }

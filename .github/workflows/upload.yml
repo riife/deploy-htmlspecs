@@ -1,0 +1,22 @@
+on:
+    schedule:
+        - cron: "0 0 1 * *"
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: latest
+
+            - run: |
+                  npm i -g @xmit.co/xmit
+                  xmit set-key $XMIT
+                  bun index.ts
+              env:
+                  XMIT: ${{ secrets.XMIT }}

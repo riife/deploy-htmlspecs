@@ -4,8 +4,9 @@ import path from "node:path";
 
 const DIR = "htmlspecs";
 
+console.time(DIR);
 await updateGit();
-refactorFile(path.resolve(DIR, "dropdown.js"), (text) => {
+await refactorFile(path.resolve(DIR, "dropdown.js"), (text) => {
     return text
         .replace(
             `window.location.hostname === 'ecma262.com'`,
@@ -15,6 +16,7 @@ refactorFile(path.resolve(DIR, "dropdown.js"), (text) => {
 });
 await replaceUrls();
 await xmit();
+console.timeEnd(DIR);
 
 async function refactorFile(filepath: string, cb: (text: string) => string) {
     const file = Bun.file(filepath);
@@ -25,7 +27,7 @@ async function refactorFile(filepath: string, cb: (text: string) => string) {
 
 async function updateGit() {
     if (fs.existsSync(path.resolve(DIR, ".git"))) {
-        await $`cd ${DIR} && git pull`;
+        await $`cd ${DIR} && git clean -fd && git checkout . && git pull`;
     } else {
         await $`git clone https://github.com/JinDX/htmlspecs.com ${DIR} --depth=1`;
     }
@@ -43,8 +45,9 @@ async function replaceUrls() {
 }
 
 async function xmit() {
-    fs.rmSync(path.resolve(DIR, "README.md"));
-    return Bun.write(
+    await $`cd ${DIR} && git rm -f README.md`;
+
+    await Bun.write(
         path.resolve(DIR, "xmit.toml"),
         `\
 404 = "404.html"
@@ -65,4 +68,5 @@ name = "x-content-type-options"
 [[headers]]
 name = "server"`
     );
+    await $`cd ${DIR} && xmit html.yieldray.fun`;
 }
