@@ -45,7 +45,7 @@ async function replaceUrls() {
 }
 
 async function xmit() {
-    await $`cd ${DIR} && git rm -f README.md`;
+    await $`cd ${DIR} && git rm -f README.md  || true`;
 
     await Bun.write(
         path.resolve(DIR, "xmit.toml"),
