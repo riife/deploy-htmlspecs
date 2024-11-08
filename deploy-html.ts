@@ -39,7 +39,7 @@ async function replaceUrls() {
         refactorFile(filepath, (text) =>
             text
                 .replaceAll("https://htmlspecs.com/", "https://html.yieldray.fun/")
-                .replaceAll("https://ecma262.com/", "https://ecma262.yieldray.fun")
+                .replaceAll("https://ecma262.com/", "https://ecma262.yieldray.fun/")
         );
     }
 }
